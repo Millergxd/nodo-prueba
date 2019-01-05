@@ -76,36 +76,113 @@ function listTeamsIds () {
 // 1 Arreglo con los nombres de los equipos y el país al que pertenecen, ordenados alfabéticamente por el nombre de su país de origen.
 function listTeamsByCountry () {
   // CODE HERE
+  let copy_teams = teams.slice()
+  return copy_teams.sort((first_element, second_elemnt) => {
+    if(first_element.country < second_elemnt.country)
+      return -1
+    if(first_element.country > second_elemnt.country)
+      return 1
+    return 0
+  })
 }
 
 // 2 Arreglo con los nombres de los equipos ordenados de mayor a menor por la cantidad de victorias en champions league.
 function sortTeamsByWins () {
   // CODE HERE
+  let copy_wins = winsByTeams.slice()
+  copy_wins.sort((first_element, second_element) => second_element.wins-first_element.wins)
+  return copy_wins.map((winByTeam) => {
+    return teams.find((team) => team.id === winByTeam.teamId)
+  })
 }
 
 // 3 Arreglo de objetos en donde se muestre el nombre de las ligas y la sumatoria de las victorias de los equipos que pertenecen a ellas.
 function leaguesWithWins () {
   // CODE HERE
+  let array_objects=[]
+  leagues.map((league, index) => {
+    array_objects.push({})
+    array_objects[index].name = league.name
+    let all_wins = 0
+    teamsByLeague.forEach(team => {
+      if(league.id === team.leagueId){
+        all_wins += winsByTeams.find(wins => wins.teamId === team.teamId).wins
+      }
+    });
+    array_objects[index].all_wins = all_wins
+  })
+  return array_objects
 }
 
 // 4 Objeto en que las claves sean los nombres de las ligas y los valores el nombre del equipo con la menor cantidad de victorias en champions.
 function leaguesWithTeamWithLestWins () {
   // CODE HERE
+  let object = {}
+  leagues.forEach(league => {
+    let lowest_win = {wins: 0}
+    let aux = 0
+    teamsByLeague.forEach(team => {
+      if(league.id === team.leagueId){
+        aux = winsByTeams.find(champions => team.teamId === champions.teamId)
+        if(lowest_win.wins === 0 || aux.wins < lowest_win.wins)
+          lowest_win = aux  
+      }
+    })
+    object[league.name] = teams.find(team => lowest_win.teamId === team.id ).name
+  })
+  return object
 }
 
 // 5 Objeto en que las claves sean los nombres de las ligas y los valores el nombre del equipo con la mayor cantidad de victorias en champions.
 function leaguesWithTeamWithMostWins () {
   // CODE HERE
+  let object = {}
+  leagues.forEach(league => {
+    let highest_win =  {wins: 0}
+    let aux = 0
+    teamsByLeague.forEach(team => {
+      if(league.id === team.leagueId){
+        aux = winsByTeams.find(champions => team.teamId === champions.teamId)
+        if(highest_win.wins === 0 || aux.wins > highest_win.wins)
+          highest_win = aux  
+      }
+    })
+    object[league.name] = teams.find(team => highest_win.teamId === team.id ).name
+  })
+  return object
 }
 
 // 6 Arreglo con los nombres de las ligas ordenadas de mayor a menor por la cantidad de victorias de sus equipos.
 function sortLeaguesByTeamsByWins () {
   // CODE HERE
+  let copy_leagues = leagues.slice()
+  copy_leagues.map(league => {
+    let aux = 0
+    teamsByLeague.forEach(team => {
+      if(league.id === team.leagueId){
+        aux += winsByTeams.find(win => win.teamId === team.teamId).wins
+      }
+    })
+    league.total_wins = aux
+  })
+  copy_leagues.sort((first_element, second_element ) => second_element.total_wins - first_element.total_wins)
+  return copy_leagues.map(league => league.name)
 }
 
 // 7 Arreglo con los nombres de las ligas ordenadas de mayor a menor por la cantidad de equipos que participan en ellas.
 function sortLeaguesByTeams () {
   // CODE HERE
+  let copy_leagues = leagues.slice()
+  copy_leagues.map(league => {
+    let aux = 0
+    teamsByLeague.forEach(team => {
+      if(league.id === team.leagueId)
+        aux += 1
+    })
+    league.sum_teams = aux
+  })
+  copy_leagues.sort((first_element, second_element ) => second_element.sum_teams - first_element.sum_teams)
+  return copy_leagues.map(league => league.name)
 }
 
 // 8 Agregar un nuevo equipo con datos ficticios a "teams", asociarlo a la liga de Francia y agregar un total de 4 victorias en champions.
@@ -113,6 +190,14 @@ function sortLeaguesByTeams () {
 // No modificar arreglos originales para no alterar las respuestas anteriores al correr la solución
 function newTeamRanking () {
   // CODE HERE
+  let copy_teams = teams.slice()
+  let copy_winsByTeam = winsByTeams.slice()
+  let copy_teamsByLeague = teamsByLeague.slice()
+  copy_teams.push({id:14, country: "France", name: "Whatever"})
+  copy_winsByTeam.push({ teamId: 14, wins: 4 })
+  copy_teamsByLeague.push({ teamId: 14, leagueId: 7 })
+  copy_winsByTeam.sort((first_element, second_element) => second_element.wins-first_element.wins)
+  return `Ranking ${copy_winsByTeam.findIndex((win => win.teamId === 14))+1}`
 }
 
 // 9 Realice una función que retorne una promesa con los nombres de los equipos en upper case.
@@ -123,7 +208,12 @@ function newTeamRanking () {
 async function getTeamsNamesAsUpperCase () {
   let response
   // ------MAKE AWAIT CALL HERE------
-
+  getWithUppercase = async () =>{
+    return new Promise((resolve, reject) => {
+        resolve(teams.map(team => team.name.toUpperCase()))
+    })
+  }
+  response = await getWithUppercase()
   // --------------------------------
   console.log('response:')
   console.log(response)
