@@ -59,6 +59,7 @@
        */
       goToDetail(id) {
         // CODE HERE
+        this.$router.push({name:'Detail', params:{id:id}})
       }
     }
   }
